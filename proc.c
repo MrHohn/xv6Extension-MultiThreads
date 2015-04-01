@@ -12,22 +12,6 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
-// struct semaphore{
-//   int value;
-//   int active;
-//   struct spinlock lock;
-// };
-
-struct semaphore{
-  int value;
-  int active;
-  struct spinlock lock;
-};
-
-struct semaphore sem;
-
-// struct semaphore sem[32];
-
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -40,18 +24,6 @@ void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
-}
-
-void
-seminit(void)
-{
-  // int i;
-  // for(i = 0; i < 31; ++i)
-  // {
-  //   initlock(&sem[i].lock, "semaphore");
-  // }
-  initlock(&sem.lock, "semaphore");
-  // sem.value = 0;
 }
 
 //PAGEBREAK: 32

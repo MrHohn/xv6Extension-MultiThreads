@@ -102,38 +102,3 @@ sys_halt(void)
     outw(0xB004, 0x2000);
   return 0;
 }
-
-int
-sys_sem_init(void)
-{
-
-  return 0;
-}
-
-int
-sys_sem_destroy(void)
-{
-  
-  return 0;
-}
-
-int
-sys_sem_wait(void)
-{
-  
-  return 0;
-}
-
-int
-sys_sem_signal(void)
-{
-  // semaphore.value = 0;
-  // ptable;
-  // tickslock;
-  // acquire(&tickslock);
-  // sem;
-  // acquire(&ptable.lock);
-  // semtable.sem[0].value = 0;
-  acquire(&sem.lock);
-  return 0;
-}
