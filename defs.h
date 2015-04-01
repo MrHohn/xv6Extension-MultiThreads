@@ -8,6 +8,7 @@ struct rtcdate;
 struct spinlock;
 struct stat;
 struct superblock;
+struct semaphore;
 
 // bio.c
 void            binit(void);
@@ -118,6 +119,10 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+void            seminit(void);
+// extern struct semaphore sem[32];
+extern struct semaphore sem;
+// extern struct semaphoretable semtable;
 
 // swtch.S
 void            swtch(struct context**, struct context*);
