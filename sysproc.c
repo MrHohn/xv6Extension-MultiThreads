@@ -102,3 +102,15 @@ sys_halt(void)
     outw(0xB004, 0x2000);
   return 0;
 }
+
+int
+sys_clone(void)
+{
+  return 0;
+}
+
+int
+sys_join(void)
+{
+  return 0;
+}

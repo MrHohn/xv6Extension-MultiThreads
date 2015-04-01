@@ -25,3 +25,5 @@
 #define SYS_sem_destroy 24
 #define SYS_sem_wait    25
 #define SYS_sem_signal  26
+#define SYS_clone  27
+#define SYS_join   28

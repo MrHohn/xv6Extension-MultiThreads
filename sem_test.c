@@ -121,7 +121,9 @@ int main(int argc, char **argv)
 	else
 		printf(1, "TEST FAILED!\n");
 	
-	// Exit
+	// Clean up semaphore
 	sem_destroy(SEMAPHORE_NUM);
+
+	// Exit
 	exit();
 }
