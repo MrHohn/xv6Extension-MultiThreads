@@ -80,6 +80,11 @@ void child(void)
 
 int main(int argc, char **argv)
 {
+	// sem_init(SEMAPHORE_NUM, 1);
+	// sem_wait(SEMAPHORE_NUM, 1);
+	// sem_signal(SEMAPHORE_NUM, 1);
+	// sem_destroy(SEMAPHORE_NUM);
+
 	int i;
 	int final_counter;
 	int final_target = NUM_CHILDREN*TARGET_COUNT_PER_CHILD;
@@ -117,5 +122,6 @@ int main(int argc, char **argv)
 		printf(1, "TEST FAILED!\n");
 	
 	// Exit
+	sem_destroy(SEMAPHORE_NUM);
 	exit();
 }
