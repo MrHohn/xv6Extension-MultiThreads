@@ -465,16 +465,8 @@ procdump(void)
 }
 
 int
-sys_clone(void)
+clone(void* function, void *arg, void *stack)
 {
-  int function, arg, stack;
-  if(argint(0, &function) < 0)
-    return -1;
-  if(argint(1, &arg) < 0)
-    return -1;
-  if(argint(2, &stack) < 0)
-    return -1;
-
   int i, pid;
   struct proc *np;
 
@@ -492,13 +484,13 @@ sys_clone(void)
   // reallocate old process's page table to new process
   np->pgdir = proc->pgdir;
   // modified the return ip to thread function
-  np->tf->eip = function;
+  np->tf->eip = (int)function;
   // modified the thread indicator's value
   np->isthread = 1;
   // modified the stack
-  np->stack = stack;
-  np->tf->esp = stack + 4092;
-  *((int *)(np->tf->esp)) = arg; // push the argument
+  np->stack = (int)stack;
+  np->tf->esp = (int)stack + 4092;
+  *((int *)(np->tf->esp)) = (int)arg; // push the argument
   *((int *)(np->tf->esp - 4)) = 0xFFFFFFFF; // push the return address
   np->tf->esp -= 4;
 
@@ -521,12 +513,8 @@ sys_clone(void)
 }
 
 int
-sys_join(void)
+join(void **stack)
 {
-  int stack;
-  if(argint(0, &stack) < 0)
-    return -1;
-
   struct proc *p;
   int havekids, pid;
 

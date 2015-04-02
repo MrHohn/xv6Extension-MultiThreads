@@ -23,41 +23,36 @@ seminit(void)
 }
 
 int
-sys_sem_init(void)
+sem_init(int num, int max)
 {
-  int num, max;
-  if(argint(0, &num) < 0)
-    return -1;
-  if(argint(1, &max) < 0)
-    return -1;
   // cprintf("semaphore[%d].value is initialized to %d\n", num, max);
 
+  acquire(&sem[num].lock);
   if(sem[num].active != 0) 
     return -1;
   sem[num].value = max;
   sem[num].active = 1;
+  release(&sem[num].lock);
 
   return 0;
 }
 
 int
-sys_sem_destroy(void)
+sem_destroy(int num)
 {
-  int num;
-  if(argint(0, &num) < 0)
+  acquire(&sem[num].lock);
+  if(sem[num].active != 1) 
     return -1;
   sem[num].active = 0;
   // cprintf("semaphore[%d] is destroied\n", num);
+  release(&sem[num].lock);
 
   return 0;
 }
 
 int
-sys_sem_wait(void)
+sem_wait(int num, int count)
 {
-  int num;
-  if(argint(0, &num) < 0)
-    return -1;
   // cprintf("wait for semaphore[%d]\n", num);
   if(sem[num].active == 0) 
     return -1;
@@ -68,23 +63,17 @@ sys_sem_wait(void)
     sleep(&sem[num], &sem[num].lock);
   }
   // cprintf("got semaphore[%d] and run\n", num);
-  --sem[num].value;
+  sem[num].value -= count;
   release(&sem[num].lock);
 
   return 0;
 }
 
 int
-sys_sem_signal(void)
+sem_signal(int num, int count)
 {
-  int num, count;
-  if(argint(0, &num) < 0)
-    return -1;
-  if(argint(1, &count) < 0)
-    return -1;
   if(sem[num].active == 0) 
-    return -1;
-  
+    return -1; 
   acquire(&sem[num].lock);
   // cprintf("semaphore[%d]'s value is added up %d\n", num, count);
   sem[num].value += count;

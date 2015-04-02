@@ -119,8 +119,8 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-int             clone(void);
-int             join(void);
+int             clone(void*, void*, void*);
+int             join(void**);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
@@ -182,8 +182,12 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 
-//semaphore
+//semaphore.c
 void            seminit(void);
+int             sem_init(int, int);
+int             sem_destroy(int);
+int             sem_wait(int, int);
+int             sem_signal(int, int);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
