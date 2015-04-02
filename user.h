@@ -28,7 +28,7 @@ int sem_init(int sem, int value);
 int sem_destroy(int sem);
 int sem_wait(int sem, int count);
 int sem_signal(int sem, int count);
-int clone(void *(*func)(void*), void *arg, void *stack);
+int clone(void*, void *arg, void *stack);
 int join(void **stack);
 
 // ulib.c
