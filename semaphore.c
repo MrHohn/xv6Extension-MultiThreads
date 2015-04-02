@@ -26,7 +26,8 @@ int
 sem_init(int num, int max)
 {
   // cprintf("semaphore[%d].value is initialized to %d\n", num, max);
-
+  if(num < 0 || num > 31)
+    return -1;
   acquire(&sem[num].lock);
   if(sem[num].active != 0) 
     return -1;
@@ -40,6 +41,8 @@ sem_init(int num, int max)
 int
 sem_destroy(int num)
 {
+  if(num < 0 || num > 31)
+    return -1;
   acquire(&sem[num].lock);
   if(sem[num].active != 1) 
     return -1;
@@ -53,6 +56,8 @@ sem_destroy(int num)
 int
 sem_wait(int num, int count)
 {
+  if(num < 0 || num > 31)
+    return -1;
   acquire(&sem[num].lock);
   // cprintf("wait for semaphore[%d]\n", num);
   if(sem[num].active == 0) 
@@ -71,6 +76,8 @@ sem_wait(int num, int count)
 int
 sem_signal(int num, int count)
 {
+  if(num < 0 || num > 31)
+    return -1;
   acquire(&sem[num].lock);
   if(sem[num].active == 0) 
     return -1; 
