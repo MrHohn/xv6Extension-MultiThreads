@@ -200,6 +200,9 @@ exit(void)
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->parent == proc){
       p->parent = initproc;
+      // clean up the kernel stack of child threads
+      if(p->isthread == 1)
+        kfree(p->kstack);
       if(p->state == ZOMBIE)
         wakeup1(initproc);
     }

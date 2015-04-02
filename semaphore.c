@@ -53,11 +53,10 @@ sem_destroy(int num)
 int
 sem_wait(int num, int count)
 {
+  acquire(&sem[num].lock);
   // cprintf("wait for semaphore[%d]\n", num);
   if(sem[num].active == 0) 
     return -1;
-
-  acquire(&sem[num].lock);
   while(sem[num].value <= 0)
   {
     sleep(&sem[num], &sem[num].lock);
@@ -72,9 +71,9 @@ sem_wait(int num, int count)
 int
 sem_signal(int num, int count)
 {
+  acquire(&sem[num].lock);
   if(sem[num].active == 0) 
     return -1; 
-  acquire(&sem[num].lock);
   // cprintf("semaphore[%d]'s value is added up %d\n", num, count);
   sem[num].value += count;
   if(sem[num].value > 0) 
