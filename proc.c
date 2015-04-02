@@ -478,7 +478,14 @@ clone(void* function, void *arg, void *stack)
     return -1;
 
   np->sz = proc->sz;
-  np->parent = proc;
+  // if the process calling clone is itself a thread,
+  // copy its parent to the new thread
+  if (proc->isthread == 0) {
+    np->parent = proc;
+  }
+  else {
+    np->parent = proc->parent;
+  }
   *np->tf = *proc->tf;
 
   // Clear %eax so that fork returns 0 in the child.
