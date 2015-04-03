@@ -3,6 +3,7 @@
 #include "defs.h"
 #include "param.h"
 #include "spinlock.h"
+#define NSEMS     32 // 32 entries for semophore table
 
 struct semaphore {
   int value;
@@ -10,11 +11,12 @@ struct semaphore {
   struct spinlock lock;
 } sem[32];
 
+//function to initiallize the semophore table
 void
 seminit(void)
 {
   int i;
-  for(i = 0; i < 32; ++i)
+  for(i = 0; i < NSEMS; ++i)
   {
     initlock(&sem[i].lock, "semmaphore");
     sem[i].active = 0;
@@ -25,10 +27,12 @@ seminit(void)
 int
 sem_init(int num, int max)
 {
-  // cprintf("semaphore[%d].value is initialized to %d\n", num, max);
-  if(num < 0 || num > 31)
+  // check if the entry is valid
+  if(num < 0 || num > NSEMS)
     return -1;
+
   acquire(&sem[num].lock);
+  // check if the entry is actived
   if(sem[num].active != 0) 
     return -1;
   sem[num].value = max;
@@ -41,13 +45,15 @@ sem_init(int num, int max)
 int
 sem_destroy(int num)
 {
-  if(num < 0 || num > 31)
+  // check if the entry is valid
+  if(num < 0 || num > NSEMS)
     return -1;
+
   acquire(&sem[num].lock);
+  // check if the entry is actived
   if(sem[num].active != 1) 
     return -1;
   sem[num].active = 0;
-  // cprintf("semaphore[%d] is destroied\n", num);
   release(&sem[num].lock);
 
   return 0;
@@ -56,17 +62,19 @@ sem_destroy(int num)
 int
 sem_wait(int num, int count)
 {
-  if(num < 0 || num > 31)
+  // check if the entry is valid
+  if(num < 0 || num > NSEMS)
     return -1;
+
   acquire(&sem[num].lock);
-  // cprintf("wait for semaphore[%d]\n", num);
+  // check if the entry is actived
   if(sem[num].active == 0) 
     return -1;
   while(sem[num].value <= 0)
   {
     sleep(&sem[num], &sem[num].lock);
   }
-  // cprintf("got semaphore[%d] and run\n", num);
+  //the thread enter the critical section, grap a lock
   sem[num].value -= count;
   release(&sem[num].lock);
 
@@ -76,13 +84,17 @@ sem_wait(int num, int count)
 int
 sem_signal(int num, int count)
 {
-  if(num < 0 || num > 31)
+  // check if the entry is valid
+  if(num < 0 || num > NSEMS)
     return -1;
+
   acquire(&sem[num].lock);
+  // check if the entry is actived
   if(sem[num].active == 0) 
     return -1; 
-  // cprintf("semaphore[%d]'s value is added up %d\n", num, count);
+  // the thread exit the critical section, return a lock
   sem[num].value += count;
+  // if there is any available lock, call wakeup
   if(sem[num].value > 0) 
     wakeup(&sem[num]);
   release(&sem[num].lock);

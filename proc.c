@@ -179,17 +179,19 @@ exit(void)
     panic("init exiting");
 
   // Close all open files.
-  for(fd = 0; fd < NOFILE; fd++){
-    if(proc->ofile[fd]){
-      fileclose(proc->ofile[fd]);
-      proc->ofile[fd] = 0;
+  if (proc->isthread == 0) { // close files only if it is a process
+    for(fd = 0; fd < NOFILE; fd++){
+      if(proc->ofile[fd]){
+        fileclose(proc->ofile[fd]);
+        proc->ofile[fd] = 0;
+      }
     }
-  }
 
-  begin_op();
-  iput(proc->cwd);
-  end_op();
-  proc->cwd = 0;
+    begin_op();
+    iput(proc->cwd);
+    end_op();
+    proc->cwd = 0;
+  }
 
   acquire(&ptable.lock);
 
@@ -499,7 +501,7 @@ clone(void* function, void *arg, void *stack)
   np->isthread = 1;
   // modified the stack
   np->stack = (int)stack;
-  np->tf->esp = (int)stack + 4092;
+  np->tf->esp = (int)stack + 4092; // move esp to the top of the new stack
   *((int *)(np->tf->esp)) = (int)arg; // push the argument
   *((int *)(np->tf->esp - 4)) = 0xFFFFFFFF; // push the return address
   np->tf->esp -= 4;
@@ -541,6 +543,7 @@ join(void **stack)
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
+        // clean up the page table only if it is a process
         if(p->isthread == 0)
           freevm(p->pgdir);
         p->state = UNUSED;
