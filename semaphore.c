@@ -70,7 +70,8 @@ sem_wait(int num, int count)
   // check if the entry is actived
   if(sem[num].active == 0) 
     return -1;
-  while(sem[num].value <= 0)
+  // if there is no enough lock, sleep
+  while(sem[num].value <= count - 1)
   {
     sleep(&sem[num], &sem[num].lock);
   }

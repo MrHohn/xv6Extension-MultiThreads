@@ -203,8 +203,9 @@ exit(void)
       p->parent = initproc;
       // clean up the kernel stack of child threads
       if(p->isthread == 1){
-        p->state = ZOMBIE;
+        p->state = UNUSED;
         kfree(p->kstack);
+        p->kstack = 0;
       }
       if(p->state == ZOMBIE)
         wakeup1(initproc);
