@@ -179,19 +179,17 @@ exit(void)
     panic("init exiting");
 
   // Close all open files.
-  if (proc->isthread == 0) { // close files only if it is a process
-    for(fd = 0; fd < NOFILE; fd++){
-      if(proc->ofile[fd]){
-        fileclose(proc->ofile[fd]);
-        proc->ofile[fd] = 0;
-      }
+  for(fd = 0; fd < NOFILE; fd++){
+    if(proc->ofile[fd]){
+      fileclose(proc->ofile[fd]);
+      proc->ofile[fd] = 0;
     }
-
-    begin_op();
-    iput(proc->cwd);
-    end_op();
-    proc->cwd = 0;
   }
+
+  begin_op();
+  iput(proc->cwd);
+  end_op();
+  proc->cwd = 0;
 
   acquire(&ptable.lock);
 
@@ -199,12 +197,15 @@ exit(void)
   wakeup1(proc->parent);
 
   // Pass abandoned children to init.
+  // And kill the child threads and free their stacks
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->parent == proc){
       p->parent = initproc;
       // clean up the kernel stack of child threads
-      if(p->isthread == 1)
+      if(p->isthread == 1){
+        p->state = ZOMBIE;
         kfree(p->kstack);
+      }
       if(p->state == ZOMBIE)
         wakeup1(initproc);
     }
@@ -535,7 +536,8 @@ join(void **stack)
     // Scan through table looking for zombie children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->parent != proc)
+      // only wait for the child thread, but not the child process
+      if(p->parent != proc || p->isthread != 1)
         continue;
       havekids = 1;
       if(p->state == ZOMBIE){
@@ -543,9 +545,6 @@ join(void **stack)
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
-        // clean up the page table only if it is a process
-        if(p->isthread == 0)
-          freevm(p->pgdir);
         p->state = UNUSED;
         p->pid = 0;
         p->parent = 0;
@@ -556,7 +555,7 @@ join(void **stack)
       }
     }
 
-    // No point waiting if we don't have any children.
+    // No point waiting if we don't have any children thread.
     if(!havekids || proc->killed){
       release(&ptable.lock);
       return -1;
